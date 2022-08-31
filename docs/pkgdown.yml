@@ -1,10 +1,10 @@
-pandoc: 2.14.1
-pkgdown: 2.0.3
+pandoc: 2.17.1.1
+pkgdown: 2.0.5
 pkgdown_sha: ~
 articles:
   DSAIRM: DSAIRM.html
-last_built: 2022-06-16T13:29Z
+last_built: 2022-07-25T13:46Z
 urls:
-  reference: https://ahgroup.github.io/DSAIRM/index.html/reference
-  article: https://ahgroup.github.io/DSAIRM/index.html/articles
+  reference: https://ahgroup.github.io/DSAIRM/reference
+  article: https://ahgroup.github.io/DSAIRM/articles
 

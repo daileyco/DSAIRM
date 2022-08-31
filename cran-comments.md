@@ -9,7 +9,15 @@
 0 errors v | 0 warnings v | 0 notes v
 
 
+## Notes
+
+I changed the email address from my work to my personal one.
+
+
+ 
 ## Submission History
+
+version 0.9.5: four new apps, small bug fixes and other enhancements.
 
 version 0.9.3: major updates to app tasks, small bug fixes and other enhancements.
 

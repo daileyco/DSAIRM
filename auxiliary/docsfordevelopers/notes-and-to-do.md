@@ -1,71 +1,35 @@
-# To-do Andreas
-
-* Create diagrams for new apps with flowdiagamr: acute virus and IR, chronic virus and IR, extended bacteria, bacteria fitting
-* make tasks for extended bacteria and bacteria model fitting
-
-
-# To-do Cody
-
-First:
-* Do a quick review of the basic virus app and the model variant exploration app, just to make sure things work.
-  + basic virus and model variant exploration seem okay
-
-* Do another round of review of the new ones: acute virus and IR, chronic virus and IR, extended bacteria, bacteria fitting
-  + acute virus and IR, chronic virus and IR seem okay
-  + extended bacteria 
-    - model diagram missing A compartment entirely, maybe overwritten when made the fitting diagram?
-    - also initial description says still 2 compartment model, fixed
-    - app seems to take just a tad bit longer to open from main menu, happened a few times consistently, now can't reproduce, maybe just my computer
-  + bacteria fitting
-    - warning of missing data printed in console
-      - Warning: Removed 2 row(s) containing missing values (geom_path).
-      - Warning: Removed 10 rows containing missing values (geom_point).
-
-
-Later:
-* If time and interested: add tasks to extended bacteria and bacteria model fitting
-  + extended bacteria topic / flow ideas
-    - steady state (basic bacteria introduces briefly)
-    - IR turn on each separately (mirror other IR apps)
-    
-  + bacteria fitting
-    - quick concept checkmark of what model components are and are not being estimated (initial values for variables/compartments)
-    - how to "turn off" estimation for parameter (e.g., set initial&range to zero, set range to match initial)
-    
-
-
-
-download_code related (probably not for now):
-* rewrite run_model.R such that it calls construct_simulation_code instead of repeating code. as suitable, save a version of run_model in the auxiliary/oldfiles folder in case we need to go back.
-
-
-
-
-## Completed
-* Created style guide section in docsfordevelopers/documentation.md
-    + put consistency notes from below, likely could use rephrasing/examples, but low priority
-* Review the new acute virus and chronic virus apps. Review/check both DSAIRM and DSAIRMsolutions for those 2 apps. Flag/fix as needed.
-
-
-    
-
-
-
 # To-do list for DSAIRM package
 
-## Code Improvements
+
+## Specific Code Improvements
+* Adjust color palette for plotly to be same as ggplot (and make color blind friendly). Seems to work in generate_ggplot() but not yet in generate_plotly()
+* Make sure floating taskbar works ok with inputs and is always above all other content (currently some of the inputs and the top bar are above float)
+* Provide a 'download scenario' button, which downloads code that reproduces a given scenario. To that end, finish implementing download_code in develop branch, once it works move over to main. Download_code related:
+
+* rewrite run_model.R such that it calls construct_simulation_code instead of repeating code. 
+* run_model.R should also be calling a separate function ( generate_output() ) that processes results returned from the app calls so it can be used with generate_() functions. 
+* move all code that is related to writing the R script from app.R into a generate_downloadcode function. 
+* improve formatting of output code by adding line breaks, e.g. every modelsetting entry in its own line. 
+* Don't use colons in variable names (no my.result). Instead just call it 'result' or such.
+* The code that is produced by generate_downloadcode() should ONLY include the call to simulate_ and the generate_plot/text DSAIRM functions. No other DSAIRM function (including these new ones) should be used inside the code script given to users.
+
+
+
+
+
+## General Code Improvements
 * Continue implementing unit tests using the testthat package
-* Provide a 'download scenario' button, which downloads code that reproduces a given scenario.
 * Add checks to parameter settings, don't allow unreasonable (e.g. negative) ones
 * Continue streamlining code base to make it more general/modular/flexible
 * Fix/finish plot function edits (see code in generate_ggplot)
-* Make sure float works ok with inputs and is above
+
 
 ## Content Improvement
+* Re-create all diagrams with flowdiagramr
+* Write tasks for extended bacteria and bacteria model fitting apps
 * Check learning objectives to each overview tab
 * Implement further apps, see below
 * Once flowdiagramr is ready, use it to re-do model diagrams
-
 
 ## Apps to be implemented
 * More complicated HCV PK/PD (SISMID-U4-3/4)
@@ -84,7 +48,6 @@ download_code related (probably not for now):
 * Make videos for levels 1/2/3 for packages 
 * (webshot::appshot)[https://github.com/cran/webshot#screenshots-of-shiny-applications] could be useful packages for making static documents, vignettes
 
-
 ## General thoughts and comments
 * Maybe change name of package
 * look into R consortium package certification
@@ -94,17 +57,6 @@ download_code related (probably not for now):
 
 
 
-# Old comments, probably from Cody
 
-## App specific
 
-* Virus and Treatment
-  + Does there need to be an explanation of txstart? 
-* Fit basic model
-  + describe censoring referenced in other apps (e.g., fit model comparison)
-* Confidence intervals
-  + more content on bootstrapping, such as using percentiles for confidence intervals? a "see here for more" citation?
-* Fit flu drug
-  + error message in console: Warning in RColorBrewer::brewer.pal(N, "Set2") : n too large, allowed maximum for palette Set2 is 8 Returning the palette you asked for with that many colors
-    - Could use virdis::viridis() instead (supposed to be color blind friendly?)
-  + generated text under plot has parameters as b/g/p/ f or e (depending on model type), but could be a k?
+
