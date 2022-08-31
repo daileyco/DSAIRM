@@ -149,58 +149,10 @@ server <- function(input, output, session)
                    #each app has settings stored in apptable
                    #read and assign to list called 'appsettings'
                    #store in global variable
-                   appsettings <<- as.list(at[which(at$appid == appName),])
+                   appsettings <<- generate_appsettings(appName, at, modeldir, simdir)
 
-                   #a few apps have 2 simulator functions, combine here into vector
-                   if (nchar(appsettings$simfunction2) > 1)
-                   {
-                     appsettings$simfunction <<- c(appsettings$simfunction,appsettings$simfunction2)
-                   }
-
-                   #all columns are read in as characters, convert some
-                   appsettings$use_mbmodel = as.logical(appsettings$use_mbmodel)
-                   appsettings$use_doc = as.logical(appsettings$use_doc)
-                   appsettings$nplots = as.numeric(appsettings$nplots)
-
-                   #if an mbmodel should be used, check that it exists and load
-                   appsettings$mbmodel <- NULL
-                   if (appsettings$use_mbmodel)
-                   {
-                     appsettings$mbmodel = readRDS(paste0(modeldir,"/",appsettings$mbmodelname) )
-                     if (! is.list(appsettings$mbmodel))  {return("mbmodel could not be loaded in app.R")}
-                   }
-
-                   #if the doc of a file should be parsed for UI generation, get it here
-                   appsettings$filepath <- NULL
-                   if (appsettings$use_doc)
-                   {
-                     filepath = paste0(simdir,'/',appsettings$simfunction[1],'.R')
-                     if (! file.exists(filepath))  {return("file for function can't be found")}
-                     appsettings$filepath = filepath
-                   }
-
-                   #file name for documentation
+                   #filename for documentation
                    currentdocfilename <<- paste0(appdir,"/",appsettings$docname)
-
-                   #make globally available
-                   appsettings <<- appsettings
-
-                   #the information is stored in a list called 'appsettings'
-                   #different models can have different variables
-                   #all models need the following:
-                   #variable appid - ID (short name) of the app
-                   #variable apptitle - the name of the app. Used to display.
-                   #variable docname - name of documentation file for app
-                   #variable modelfigname - name of figure file for app
-                   #variable simfunction - the name of the simulation function(s)
-                   #variable mbmodelname - if there is an mbmodel available, list its name
-                   #variable modeltype - the type of the model to be run. if multiple, i.e. containing "_and_" it is set by UI.
-
-                   #additional elements that can be provided:
-                   #variable otherinputs - contains additional shiny UI elements that are not generated automatically by functions above
-                   #for instance all non-numeric inputs need to be provided separately.
-                   #this is provided as text
-                   #If not needed, it is empty ""
 
                    #extract function and other inputs and turn them into a taglist
                    #this uses the 1st function provided by the settings file
@@ -298,7 +250,7 @@ server <- function(input, output, session)
                      #which will be passed to caller
                      for (n in 1:length(simlist))
                      {
-                        checksim <- check_simresult(simlist[[n]])
+                        checksim <- check_simresults(simlist[[n]])
                         # an error occured
                         if (is.character(checksim)) {return(checksim)}
                      }

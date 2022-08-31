@@ -5,7 +5,7 @@
 \title{A function that takes a list of raw simulation results
 and processes them}
 \usage{
-generate_results(simlist, modelsettings)
+generate_results(simlist, fctcalls)
 }
 \arguments{
 \item{simlist}{a nested list of results from call(s) to the simulation functions}

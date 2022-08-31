@@ -24,7 +24,7 @@
 #' @details This function returns specific settings for apps.
 #' @export
 
-construct_appsettings <- function(appName, at, modeldir, simdir) {
+generate_appsettings <- function(appName, at, modeldir, simdir) {
 
   #each app has settings stored in apptable
   #read and assign to list called 'appsettings'
@@ -58,6 +58,31 @@ construct_appsettings <- function(appName, at, modeldir, simdir) {
     if (! file.exists(filepath))  {return("file for function can't be found")}
     appsettings$filepath = filepath
   }
+
+
+
+
+  ## comments copied from app.R
+  #the information is stored in a list called 'appsettings'
+  #different models can have different variables
+  #all models need the following:
+  #variable appid - ID (short name) of the app
+  #variable apptitle - the name of the app. Used to display.
+  #variable docname - name of documentation file for app
+  #variable modelfigname - name of figure file for app
+  #variable simfunction - the name of the simulation function(s)
+  #variable mbmodelname - if there is an mbmodel available, list its name
+  #variable modeltype - the type of the model to be run. if multiple, i.e. containing "_and_" it is set by UI.
+
+  #additional elements that can be provided:
+  #variable otherinputs - contains additional shiny UI elements that are not generated automatically by functions above
+  #for instance all non-numeric inputs need to be provided separately.
+  #this is provided as text
+  #If not needed, it is empty ""
+
+
+
+
 
   return(appsettings)
 

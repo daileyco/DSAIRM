@@ -39,11 +39,9 @@ generate_simulationscript <- function(modelsettings) {
    }
 
   # Generate the set of simulation function calls specified in the model settings
-  #simulation_code <- generate_simulationcode(modelsettings)
+  sim_fctcalls <- generate_fctcalls(modelsettings)
 
   # Set up character vectors to write script
-  sim_modeltype <- simulation_code[[1]]
-  sim_fctcalls <- simulation_code[[2]]
   sim_fctcalls_code <- lapply(sim_fctcalls,
                               deparse_with_linebreak_and_tabs,
                               n_characters_offset = nchar("res1 <- ")
@@ -53,7 +51,7 @@ generate_simulationscript <- function(modelsettings) {
 
   # Opening lines
   opening_lines <- paste0("# R code to run current DSAIRM scenario\n",
-                          "## model type = ", sim_modeltype,
+                          "## model type = ", modelsettings$modeltype,
                           "\n\n",
                           "library(DSAIRM)",
                           "\n")
@@ -69,11 +67,35 @@ generate_simulationscript <- function(modelsettings) {
                                   sim_fctcalls_code),
                            collapse = '\n')
 
+  # function_lines <- paste('#this is a list of the simulation function calls',
+  #                         paste0('fctcalls <- ', deparse1(sim_fctcalls)),
+  #                         '#this executes the call(s) to the function(s) to be run',
+  #                         '#results are returned as nested list, the exact structure of the list depends',
+  #                         '#on the models/app that is executed',
+  #                         'simlist <- lapply(fctcalls, function(this_fctcall){try(eval(this_fctcall))})',
+  #                         sep = '\n')
+
+  simlist_lines <- paste0('#compile simulation results in a list\n',
+                          'simlist <- list(',
+                          paste0('res', 1:length(sim_fctcalls_code), collapse = ","),
+                          ')')
+
+  checks_lines <- paste('#error handling',
+                        '#check if sim function(s) ran ok',
+                        '#we expect a list if things worked ok, otherwise an error string is returned',
+                        '#which will be passed to caller',
+                        'for (n in 1:length(simlist))\n{\nchecksim <- check_simresults(simlist[[n]])\n# an error occured\nif (is.character(checksim)) {return(checksim)}\n}',
+                        sep = "\n")
+
+
+
+  #need to figure this out to not hide behind generate_results()
   results_lines <- paste0('# to have results similar to shiny GUI\n',
-                          'all_results <- generate_output(modelsettings, list(',
-                          paste0("res", 1:length(sim_fctcalls_code), collapse = ", "),
-                          '))',
+                          'all_results <- generate_results(simlist, as.call(', deparse1(sim_fctcalls),'))',
                           '\n')
+
+
+
 
   plotting_lines <- paste0("generate_",
                            modelsettings$plotengine,
@@ -87,6 +109,7 @@ generate_simulationscript <- function(modelsettings) {
   output_text <- paste(opening_lines,
                        modelsettings_lines,
                        function_lines,
+                       simlist_lines,
                        results_lines,
                        plotting_lines,
                        closing_lines, sep = "\n")
