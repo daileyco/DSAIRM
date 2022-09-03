@@ -41,6 +41,12 @@ generate_simulationscript <- function(modelsettings) {
   # Generate the set of simulation function calls specified in the model settings
   sim_fctcalls <- generate_fctcalls(modelsettings)
 
+  # Create pseudo-fctcalls to indicate model types in downloaded script
+  sim_types <- sapply(sim_fctcalls,
+                      function(this_fctcall){
+                        gsub("^simulate_{1}(.*_{0,1}.+)$", "\\1", this_fctcall[[1]])
+                        })
+
   # Set up character vectors to write script
   sim_fctcalls_code <- lapply(sim_fctcalls,
                               deparse_with_linebreak_and_tabs,
@@ -60,6 +66,9 @@ generate_simulationscript <- function(modelsettings) {
                                 deparse_with_linebreak_and_tabs(modelsettings,
                                                                 n_characters_offset = nchar("modelsettings <- ")),
                                 '\n')
+
+  simtypes_lines <- paste0("sim_types <- ",
+                           deparse1(sim_types))
 
   function_lines <- paste0(paste0("res",
                                   1:length(sim_fctcalls_code),
@@ -90,26 +99,29 @@ generate_simulationscript <- function(modelsettings) {
 
 
   #need to figure this out to not hide behind generate_results()
-  results_lines <- paste0('# to have results similar to shiny GUI\n',
-                          'all_results <- generate_results(simlist, as.call(', deparse1(sim_fctcalls),'))',
-                          '\n')
+  ##simple not elegant way is to directly use generate_results() code
+  results_lines <- paste0('\n\n\n# to have results similar to shiny GUI\n',
+                          paste0(gsub("fctcalls", "sim_types", deparse(generate_results))[c(-1,-2, -length(deparse(generate_results))+0:1)], collapse = "\n"),
+                          '\n\n\n')
 
 
 
 
   plotting_lines <- paste0("generate_",
                            modelsettings$plotengine,
-                           "(all_results)",
+                           "(result)",
                            "\n",
-                           "cat(gsub('<br/>', '\\n', generate_text(all_results)))")
+                           "cat(gsub('<br/>', '\\n', generate_text(result)))")
 
   closing_lines <- paste0("\n\n# Happy simulating! :)")
 
   # Writing to file
   output_text <- paste(opening_lines,
                        modelsettings_lines,
+                       simtypes_lines,
                        function_lines,
                        simlist_lines,
+                       checks_lines,
                        results_lines,
                        plotting_lines,
                        closing_lines, sep = "\n")

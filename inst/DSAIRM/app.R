@@ -219,7 +219,7 @@ server <- function(input, output, session)
                      output$text <- NULL
 
                      #isolate UI inputs to make them non-reactive
-                     app_input <- isolate(reactiveValuesToList(input))
+                     app_input <<- isolate(reactiveValuesToList(input))
 
                      # this function parses the inputs and app settings of the UI
                      # to generate a list of model settings
@@ -244,6 +244,8 @@ server <- function(input, output, session)
                      #on the models/app that is executed
                      simlist <- lapply(fctcalls, function(this_fctcall){try(eval(this_fctcall))})
 
+
+
                      #error handling
                      #check if a simresult function ran ok
                      #we expect a list if things worked ok, otherwise an error string is returned
@@ -260,6 +262,7 @@ server <- function(input, output, session)
                      #and processes these results into
                      # a list in a format needed to generate figures/text.
                      result <- generate_results(simlist, fctcalls)
+
 
 
 

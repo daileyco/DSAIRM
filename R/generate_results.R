@@ -5,7 +5,7 @@
 #' calling one or multiple simulation functions.
 #'
 #' @param simlist a nested list of results from call(s) to the simulation functions
-#' @param modelsettings a list with model settings information, usually from generate_modelsettings()
+#' @param fctcalls a list with simulation function calls from generate_fctcalls()
 #' @return A vectored list named "result" with each main list element containing the simulation results in a dataframe called dat and associated metadata required for generate_plot and generate_text functions. Most often there is only one main list entry (result[[1]]) for a single plot/text.
 #' @details This function processes and aggregates simulation results generated from a single set of modelsettings.
 #' @importFrom utils head tail
@@ -15,37 +15,39 @@
 generate_results <- function(simlist,fctcalls) {
 
   # will hold information to be returned
-  result <- vector("list",length(simlist))
+  # result <- vector("list",length(simlist))
+  result <- vector("list",ifelse(is.null(modelsettings$nplots), 1, modelsettings$nplots))
 
+  for(nres in 1:length(result)){
   ##################################
   #default for text display, used by most basic simulation models
   #can/will be potentially overwritten below for specific types of models
   ##################################
 
-  result[[1]]$maketext = TRUE #indicate if we want the generate_text function to process data and generate text
-  result[[1]]$showtext = NULL #text can be added here which will be passed through to generate_text and displayed for EACH plot
-  result[[1]]$finaltext = 'Numbers are rounded to 2 significant digits.' #text can be added to this, which will be passed through to generate_text and displayed once
+  result[[nres]]$maketext = TRUE #indicate if we want the generate_text function to process data and generate text
+  result[[nres]]$showtext = NULL #text can be added here which will be passed through to generate_text and displayed for EACH plot
+  result[[nres]]$finaltext = 'Numbers are rounded to 2 significant digits.' #text can be added to this, which will be passed through to generate_text and displayed once
 
   ##################################
   #default for plot display, used by most basic simulation models
   #can/will be potentially overwritten below for specific types of models
   ##################################
-  result[[1]]$plottype = "Lineplot"
-  result[[1]]$xlab = "Time"
-  result[[1]]$ylab = "Numbers"
-  result[[1]]$legend = "Compartments"
+  result[[nres]]$plottype = "Lineplot"
+  result[[nres]]$xlab = "Time"
+  result[[nres]]$ylab = "Numbers"
+  result[[nres]]$legend = "Compartments"
 
   #if plotscale is not provided, assume no log scales for x and y, i.e. set to ''
   plotscale = ifelse(is.null(modelsettings$plotscale),'',modelsettings$plotscale)
-  result[[1]]$xscale = 'identity'
-  result[[1]]$yscale = 'identity'
-  if (plotscale == 'x' | plotscale == 'both') { result[[1]]$xscale = 'log10'}
-  if (plotscale == 'y' | plotscale == 'both') { result[[1]]$yscale = 'log10'}
+  result[[nres]]$xscale = 'identity'
+  result[[nres]]$yscale = 'identity'
+  if (plotscale == 'x' | plotscale == 'both') { result[[nres]]$xscale = 'log10'}
+  if (plotscale == 'y' | plotscale == 'both') { result[[nres]]$yscale = 'log10'}
 
 
 
-  result[[1]]$dat <- NULL
-
+  result[[nres]]$dat <- NULL
+  }
 
 
   noutbreaks = 0 #tracking fraction of outbreaks for stochastic models
@@ -159,46 +161,47 @@ generate_results <- function(simlist,fctcalls) {
       simresult$dat$steady <- NULL
       simdat = simresult$dat
 
-      #number of columns - each outcome gets a column
-      result[[n]]$ncols = modelsettings$nplots
 
       #loop over each outer list element corresponding to a plot and fill it with another list
       #of meta-data and data needed to create each plot
       #each parameter-output pair is its own plot, therefore its own list entry
-      ct=1; #some counter
+      # ct=1; #some counter
       for (nn in 1:modelsettings$nplots) #for specified parameter, loop over outcomes
       {
+        #number of columns - each outcome gets a column
+        result[[nn]]$ncols = modelsettings$nplots
+
         #data frame for each plot
         xvals = simdat[,modelsettings$samplepar] #get parameter under consideration
         xvalname = modelsettings$samplepar
         yvals = simdat[,nn] #first 3 elements are outcomes
         yvalname = colnames(simdat)[nn]
         dat = data.frame(xvals = xvals, yvals = yvals, varnames = yvalname)
-        result[[ct]]$dat = dat
+        result[[nn]]$dat = dat
 
         #meta-data for each plot
-        result[[ct]]$plottype = modelsettings$plottype
-        result[[ct]]$xlab = xvalname
-        result[[ct]]$ylab = yvalname
-        result[[ct]]$makelegend = FALSE #no legend for these plots
+        result[[nn]]$plottype = modelsettings$plottype
+        result[[nn]]$xlab = xvalname
+        result[[nn]]$ylab = yvalname
+        result[[nn]]$makelegend = FALSE #no legend for these plots
 
         #if plotscale is not provided, assume no log scales for x and y, i.e. set to ''
         plotscale = ifelse(is.null(modelsettings$plotscale),'',modelsettings$plotscale)
 
-        result[[ct]]$xscale = 'identity'
-        result[[ct]]$yscale = 'identity'
-        if (plotscale == 'x' | plotscale == 'both') { result[[ct]]$xscale = 'log10'}
-        if (plotscale == 'y' | plotscale == 'both') { result[[ct]]$yscale = 'log10'}
+        result[[nn]]$xscale = 'identity'
+        result[[nn]]$yscale = 'identity'
+        if (plotscale == 'x' | plotscale == 'both') { result[[nn]]$xscale = 'log10'}
+        if (plotscale == 'y' | plotscale == 'both') { result[[nn]]$yscale = 'log10'}
 
         #the following are for text display for each plot
-        result[[ct]]$maketext = TRUE #if true we want the generate_text function to process data and generate text, if 0 no result processing will occur inside generate_text
-        result[[ct]]$finaltext = paste("System might not have reached steady state", length(steady) - sum(steady), "times")
+        result[[nn]]$maketext = TRUE #if true we want the generate_text function to process data and generate text, if 0 no result processing will occur inside generate_text
+        result[[nn]]$finaltext = paste("System might not have reached steady state", length(steady) - sum(steady), "times")
 
         #set y-axis limits based on variable
-        result[[ct]]$ymin = min(result[[ct]]$dat$yvals, na.rm=TRUE)
-        result[[ct]]$ymax = max(result[[ct]]$dat$yvals, na.rm=TRUE)
+        result[[nn]]$ymin = min(result[[nn]]$dat$yvals, na.rm=TRUE)
+        result[[nn]]$ymax = max(result[[nn]]$dat$yvals, na.rm=TRUE)
 
-        ct = ct + 1
+        # ct = ct + 1
       } #loop over plots
     }
     ##################################

@@ -64,7 +64,9 @@ generate_fctcalls <- function(modelsettings)
   # the only exceptions are stochastic apps, and those when user runs both models
   if (!grepl('_stochastic_',modeltype)  && !grepl('_and_',modeltype))
   {
-    fctcalls[1,] <- c(simfunction, NA, "")
+    whichsimfunction <- ifelse(length(c(simfunction, simfunction2)[which(grepl(gsub("_", "", modeltype), c(simfunction, simfunction2)))])==0, simfunction, c(simfunction, simfunction2)[which(grepl(gsub("_", "", modeltype), c(simfunction, simfunction2)))])
+    whichrngseed <- ifelse(grepl("usanalysis", modeltype), modelsettings$rngseed, NA)
+    fctcalls[1,] <- c(whichsimfunction, whichrngseed, "")
   }
 
   ###################################
@@ -77,7 +79,7 @@ generate_fctcalls <- function(modelsettings)
     nreps = ifelse(is.null(modelsettings$nreps),1,modelsettings$nreps)
     seed = modelsettings$rngseed
     # data frame with different random seeds
-    fctcalls <- c(rep(simfunction,nreps), seed+(0:(nreps-1)), "")
+    fctcalls[1:nreps,] <- c(rep(simfunction,nreps), seed+(0:(nreps-1)), rep("",nreps))
 
   }
 
@@ -98,8 +100,8 @@ generate_fctcalls <- function(modelsettings)
   {
     nreps = ifelse(is.null(modelsettings$nreps),1,modelsettings$nreps)
     seed = modelsettings$rngseed
-    fctcalls <- c(rep(simfunction,nreps), seed+(0:(nreps-1)), "")
-    fctcalls <- cbind(fctcalls,c(simfunction2, NA, ""))
+    fctcalls[1:nreps,] <- c(rep(simfunction,nreps), seed+(0:(nreps-1)), rep("",nreps))
+    fctcalls <- rbind(fctcalls,c(simfunction2, NA, ""))
   }
 
 
@@ -128,7 +130,7 @@ generate_fctcalls <- function(modelsettings)
     #the matching will produce NA
     #we need users to provide all inputs, thus if NA are detected
     #we return an error message
-    if (sum(is.na(currentargs)>0))
+    if (sum(is.na(currentargs))>0)
     {
       return('Please provide values for all inputs.')
     }
